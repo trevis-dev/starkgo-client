@@ -33,7 +33,8 @@ const Board = (props: { gameId: number, board: BigInt, myTurn: boolean, myColor:
             const [x, y] = ev.currentTarget.value;
             setPosition(() => ({ x: StringToRow[x as keyof (typeof StringToRow)], y: StringToColumn[y as keyof (typeof StringToColumn)]}));
         } else {
-            resetPosition();        }
+            resetPosition();       
+        }
         setMove(() => newMove);
     }
     return (
@@ -46,9 +47,11 @@ const Board = (props: { gameId: number, board: BigInt, myTurn: boolean, myColor:
                         value={move}
                         onChange={handleMoveChange}
                     />
-                    <button 
+                    <button
                         onClick={async () => {
                             if (!position || !game) return;
+                            console.log(position);
+                            debugger;
                             await playMove(account.account, props.gameId, position);
                             setMove(() => "");
                             resetPosition();

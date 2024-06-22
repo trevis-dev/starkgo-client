@@ -1,7 +1,7 @@
 import { AccountInterface } from "starknet";
 import { Entity } from "@dojoengine/recs";
 import { ClientComponents } from "./createClientComponents";
-import { Position } from "../utils";
+import { ColumnToY, Position, RowToX } from "../utils";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { ContractComponents } from "./generated/contractComponents";
 import type { IWorld } from "./generated/generated";
@@ -74,7 +74,7 @@ export function createSystemCalls(
             const { transaction_hash } = await client.actions.play_move({
                 account,
                 game_id: gameId,
-                position,
+                position: {x: RowToX[position.x], y: ColumnToY[position.y]},
             });
 
             await account.waitForTransaction(transaction_hash, {
