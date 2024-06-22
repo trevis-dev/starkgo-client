@@ -220,7 +220,9 @@ function App() {
 
             {game && gameId && gameState === "Ongoing" && playerColor ? 
                 <>
-                    <p>{myTurn ? "It is your turn" : "It is your opponen'ts turn"}</p>
+                    <p style={{textDecoration : myTurn ? "underline" : "none"}}>
+                        {myTurn ? "It is your turn !" : "It is your opponen'ts turn"}
+                    </p>
                     <Board 
                         gameId={gameId}
                         board={game.board}
