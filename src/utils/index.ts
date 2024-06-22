@@ -87,25 +87,6 @@ export type Position = {
     y: Column,
 };
 
-export function updatePositionWithDirection(
-    direction: Direction,
-    value: { vec: { x: number; y: number } }
-) {
-    switch (direction) {
-        case Direction.Left:
-            value.vec.x--;
-            break;
-        case Direction.Right:
-            value.vec.x++;
-            break;
-        case Direction.Up:
-            value.vec.y--;
-            break;
-        case Direction.Down:
-            value.vec.y++;
-            break;
-        default:
-            throw new Error("Invalid direction provided");
-    }
-    return value;
+export const getPositionLabel = (lastMove: number[]) => {
+    return `${String.fromCharCode(65+lastMove[0])}${lastMove[1]+1}`;
 }

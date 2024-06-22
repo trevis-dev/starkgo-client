@@ -3,7 +3,7 @@ import { Entity, getComponentValue } from "@dojoengine/recs";
 import React, { useEffect, useState } from "react";
 import "./App.css";
 import Board from "./Board";
-// import { Position } from "./utils";
+import { getPositionLabel } from "./utils";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useDojo } from "./dojo/useDojo";
 
@@ -221,21 +221,33 @@ function App() {
             {game && gameId && gameState === "Ongoing" && playerColor ? 
                 <>
                     <p style={{textDecoration : myTurn ? "underline" : "none"}}>
-                        {myTurn ? "It is your turn !" : "It is your opponen'ts turn"}
+                        {myTurn ? `It's your turn ! [${playerColor}]` : `It's your opponent's turn (${playerColor === "White" ? "Black": "White" })`}
                     </p>
+                    {game.nb_moves?myTurn ?
+                        game?.last_passed 
+                        ? <p style={{fontStyle: "italic"}}>Your opponent passed.</p> 
+                        : game?.previous_board
+                            ? <p style={{fontStyle: "italic"}}>Your opponent played {getPositionLabel(game.last_move)}.</p> 
+                            : null
+                        :game?.last_passed 
+                        ? <p style={{fontStyle: "italic"}}>You passed.</p> 
+                        : game?.previous_board
+                            ? <p style={{fontStyle: "italic"}}>You just played {getPositionLabel(game.last_move)}.</p> 
+                            : null
+                    :null
+                    }
                     <Board 
                         gameId={gameId}
                         board={game.board}
                         myTurn={myTurn}
                         myColor={playerColor}
                     />
-                    <button>Pass</button> 
                 </>
                 : null}
             {selectedGameId 
                 ? <div>
                     <button 
-                        style={{ marginTop: 20 }} 
+                        style={{ marginTop: 20, float: "inline-start" }} 
                         onClick={() => setSelectedGameId(() => 0)}
                     >Switch game</button>
                 </div>

@@ -9,12 +9,12 @@ export function defineContractComponents(world: World) {
     Games: (() => {
       return defineComponent(
         world,
-        { game_id: RecsType.BigInt, state: RecsType.Number, controller: RecsType.BigInt, opponent: RecsType.BigInt, controller_has_black: { controller: { voted: RecsType.Boolean, controller_has_black: RecsType.Boolean }, opponent: { voted: RecsType.Boolean, controller_has_black: RecsType.Boolean } }, board: RecsType.BigInt, previous_board: RecsType.BigInt, nb_moves: RecsType.Number, prisoners: { black: RecsType.Number, white: RecsType.Number }, new_turn_player: RecsType.Number, last_passed: RecsType.Boolean, result: { winner: RecsType.Number, is_resign: RecsType.Boolean, double_score_diff: RecsType.Number } },
+        { game_id: RecsType.BigInt, state: RecsType.Number, controller: RecsType.BigInt, opponent: RecsType.BigInt, controller_has_black: { controller: { voted: RecsType.Boolean, controller_has_black: RecsType.Boolean }, opponent: { voted: RecsType.Boolean, controller_has_black: RecsType.Boolean } }, board: RecsType.BigInt, previous_board: RecsType.BigInt, nb_moves: RecsType.Number, prisoners: { black: RecsType.Number, white: RecsType.Number }, new_turn_player: RecsType.Number, last_passed: RecsType.Boolean, last_move: [RecsType.Number, RecsType.Number], result: { winner: RecsType.Number, is_resign: RecsType.Boolean, double_score_diff: RecsType.Number } },
         {
           metadata: {
             name: "Games",
-            types: ["felt252","enum","contractaddress","contractaddress","bool","bool","bool","bool","u256","u256","u32","u32","u32","enum","bool","enum","bool","u32"],
-            customTypes: ["GameState","StartVote","StartPlayerVote","StartPlayerVote","Prisoners","Player","GameResult","Player"],
+            types: ["felt252", "enum", "contractaddress", "contractaddress", "bool", "bool", "bool", "bool", "u256", "u256", "u32", "u32", "u32", "enum", "bool", "u32", "u32", "enum", "bool", "u32"],
+            customTypes: ["GameState", "StartVote", "StartPlayerVote", "StartPlayerVote", "Prisoners", "Player", "GameResult", "Player"],
           },
         }
       );

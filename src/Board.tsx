@@ -13,7 +13,7 @@ const Board = (props: { gameId: number, board: BigInt, myTurn: boolean, myColor:
     const [position, setPosition] = useState<{x: Row, y: Column}>({x: Row.None, y: Column.None});
     const {
         setup: {
-            systemCalls: { playMove },
+            systemCalls: { playMove, pass },
             clientComponents: { Games },
         },
         account,
@@ -50,8 +50,6 @@ const Board = (props: { gameId: number, board: BigInt, myTurn: boolean, myColor:
                     <button
                         onClick={async () => {
                             if (!position || !game) return;
-                            console.log(position);
-                            debugger;
                             await playMove(account.account, props.gameId, position);
                             setMove(() => "");
                             resetPosition();
@@ -60,7 +58,20 @@ const Board = (props: { gameId: number, board: BigInt, myTurn: boolean, myColor:
                     >
                         Play {position.x ? move : ""}
                     </button>
+                    
                 </div>
+                <button 
+                    disabled={!props.myTurn}
+                    style={{float: "inline-end"}}
+                    onClick={async () => {
+                        if (!position || !game) return;
+                        await pass(account.account, props.gameId);
+                        setMove(() => "");
+                        resetPosition();
+                    }}
+                >
+                    Pass
+                </button> 
             </div>
         </div>
     );
