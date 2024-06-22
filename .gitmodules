@@ -1,0 +1,3 @@
+[submodule "starkgo"]
+	path = starkgo
+	url = https://github.com/trevis-dev/starkgo.git
