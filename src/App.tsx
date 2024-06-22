@@ -185,7 +185,7 @@ function App() {
                     {clipboardStatus.message}
                 </div>
             )}
-
+            <hr/>
             <div className="card">
                 <div>{`burners deployed: ${account.count}`}</div>
                 <div>
@@ -213,13 +213,14 @@ function App() {
                     </p>
                 </div>
             </div>
-
+            <hr/>
             {!selectedGameId && GameSelect}
             {gameState === "Created" ? <div>Waiting for opponent...</div> : null}
             {selectedGameId != 0 && gameState === "Joined" && SetBlack}
 
             {game && gameId && gameState === "Ongoing" && playerColor ? 
                 <>
+                    <div>Prisoners - Black: {game.prisoners.black} | White: {game.prisoners.white} </div>
                     <p style={{textDecoration : myTurn ? "underline" : "none"}}>
                         {myTurn ? `It's your turn ! [${playerColor}]` : `It's your opponent's turn (${playerColor === "White" ? "Black": "White" })`}
                     </p>
@@ -244,6 +245,7 @@ function App() {
                     />
                 </>
                 : null}
+                <hr/>
             {selectedGameId 
                 ? <div>
                     <button 

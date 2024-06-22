@@ -60,18 +60,19 @@ const Board = (props: { gameId: number, board: BigInt, myTurn: boolean, myColor:
                     </button>
                     
                 </div>
-                <button 
-                    disabled={!props.myTurn}
-                    style={{float: "inline-end"}}
-                    onClick={async () => {
-                        if (!position || !game) return;
-                        await pass(account.account, props.gameId);
-                        setMove(() => "");
-                        resetPosition();
-                    }}
-                >
-                    Pass
-                </button> 
+                <div>
+                    <button 
+                        disabled={!props.myTurn}
+                        onClick={async () => {
+                            if (!position || !game) return;
+                            await pass(account.account, props.gameId);
+                            setMove(() => "");
+                            resetPosition();
+                        }}
+                    >
+                        Pass
+                    </button>
+                </div>
             </div>
         </div>
     );
