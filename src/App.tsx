@@ -240,6 +240,7 @@ function App() {
                     <Board 
                         gameId={gameId}
                         board={game.board}
+                        last_move={game.last_move}
                         myTurn={myTurn}
                         myColor={playerColor}
                     />
