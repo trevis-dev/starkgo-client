@@ -2,58 +2,22 @@
 
 import { defineComponent, Type as RecsType, World } from "@dojoengine/recs";
 
-export type ContractComponents = Awaited<
-    ReturnType<typeof defineContractComponents>
->;
+export type ContractComponents = Awaited<ReturnType<typeof defineContractComponents>>;
 
 export function defineContractComponents(world: World) {
-    return {
-        DirectionsAvailable: (() => {
-            return defineComponent(
-                world,
-                { player: RecsType.BigInt, directions: RecsType.StringArray },
-                {
-                    metadata: {
-                        name: "DirectionsAvailable",
-                        types: ["contractaddress"],
-                        customTypes: ["Direction"],
-                    },
-                }
-            );
-        })(),
-        Moves: (() => {
-            return defineComponent(
-                world,
-                {
-                    player: RecsType.BigInt,
-                    remaining: RecsType.Number,
-                    last_direction: RecsType.Number,
-                    can_move: RecsType.Boolean,
-                },
-                {
-                    metadata: {
-                        name: "Moves",
-                        types: ["contractaddress", "u8", "enum", "bool"],
-                        customTypes: ["Direction"],
-                    },
-                }
-            );
-        })(),
-        Position: (() => {
-            return defineComponent(
-                world,
-                {
-                    player: RecsType.BigInt,
-                    vec: { x: RecsType.Number, y: RecsType.Number },
-                },
-                {
-                    metadata: {
-                        name: "Position",
-                        types: ["contractaddress", "u32", "u32"],
-                        customTypes: ["Vec2"],
-                    },
-                }
-            );
-        })(),
-    };
+  return {
+    Games: (() => {
+      return defineComponent(
+        world,
+        { game_id: RecsType.BigInt, state: RecsType.Number, controller: RecsType.BigInt, opponent: RecsType.BigInt, controller_has_black: { controller: { voted: RecsType.Boolean, controller_has_black: RecsType.Boolean }, opponent: { voted: RecsType.Boolean, controller_has_black: RecsType.Boolean } }, board: RecsType.BigInt, previous_board: RecsType.BigInt, nb_moves: RecsType.Number, prisoners: { black: RecsType.Number, white: RecsType.Number }, new_turn_player: RecsType.Number, last_passed: RecsType.Boolean, result: { winner: RecsType.Number, is_resign: RecsType.Boolean, double_score_diff: RecsType.Number } },
+        {
+          metadata: {
+            name: "Games",
+            types: ["felt252","enum","contractaddress","contractaddress","bool","bool","bool","bool","u256","u256","u32","u32","u32","enum","bool","enum","bool","u32"],
+            customTypes: ["GameState","StartVote","StartPlayerVote","StartPlayerVote","Prisoners","Player","GameResult","Player"],
+          },
+        }
+      );
+    })(),
+  };
 }

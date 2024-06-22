@@ -1,16 +1,19 @@
 import { useComponentValue } from "@dojoengine/react";
-import { Entity } from "@dojoengine/recs";
-import { useEffect, useState } from "react";
+import { Entity, getComponentValue } from "@dojoengine/recs";
+import React, { useEffect, useState } from "react";
 import "./App.css";
-import { Direction } from "./utils";
+import Board from "./Board";
+// import { Position } from "./utils";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useDojo } from "./dojo/useDojo";
 
 function App() {
+    const [gameId, setGameId] = useState<null|number>(null);
+    const [selectedGameId, setSelectedGameId] = useState<number>(0);
     const {
         setup: {
-            systemCalls: { spawn, move },
-            clientComponents: { Position, Moves, DirectionsAvailable },
+            systemCalls: { createGame, joinGame, setBlack },
+            clientComponents: { Games },
         },
         account,
     } = useDojo();
@@ -20,17 +23,65 @@ function App() {
         isError: false,
     });
 
-    // entity id we are syncing
-    const entityId = getEntityIdFromKeys([
-        BigInt(account?.account.address),
-    ]) as Entity;
+    useEffect(() => {
+        if (clipboardStatus.message) {
+            const timer = setTimeout(() => {
+                setClipboardStatus({ message: "", isError: false });
+            }, 3000);
 
-    // get current component values
-    const position = useComponentValue(Position, entityId);
-    const moves = useComponentValue(Moves, entityId);
-    const directions = useComponentValue(DirectionsAvailable, entityId);
+            return () => clearTimeout(timer);
+        }
+    }, [clipboardStatus.message]);
 
-    console.log("directions", directions);
+    const entityId = getEntityIdFromKeys(
+        [
+            BigInt(selectedGameId),
+        ]) as Entity;
+
+    const game = useComponentValue(Games, entityId);
+    const isController = account?.account?.address === game?.controller.toString();
+    const isOpponent = account?.account?.address === game?.opponent.toString();
+    const playerVote = isController 
+        ? game.controller_has_black.controller
+        : isOpponent
+            ? game.controller_has_black.opponent 
+            : null;
+    const otherVote = isController 
+    ? game.controller_has_black.opponent
+    : isOpponent
+        ? game.controller_has_black.controller 
+        : null;
+    const has_voted = playerVote?.voted || false;
+    const other_has_voted = otherVote?.voted || false;
+    const has_black = has_voted 
+        ? isController 
+            ? playerVote?.controller_has_black 
+            : !playerVote?.controller_has_black 
+        : false;
+    const other_has_black = other_has_voted
+    ? isController
+        ? !otherVote?.controller_has_black 
+        : otherVote?.controller_has_black 
+    : false;
+
+    const gameState = game?.state as unknown as String;
+    const playerColor = gameState == "Ongoing" 
+        ? isController 
+            ? game?.controller_has_black.controller.controller_has_black 
+                ? "Black" 
+                : "White" 
+            : game?.controller_has_black.controller.controller_has_black 
+                ? "White"
+                : "Black"
+        : null;
+
+    const myTurn = playerColor === (game?.new_turn_player as unknown as string);
+
+
+    const handleGameIdChance: React.ChangeEventHandler<HTMLInputElement> = (ev) => {
+        const value_int = parseInt(ev.currentTarget.value);
+        setGameId(() => value_int);
+    }
 
     const handleRestoreBurners = async () => {
         try {
@@ -47,15 +98,74 @@ function App() {
         }
     };
 
-    useEffect(() => {
-        if (clipboardStatus.message) {
-            const timer = setTimeout(() => {
-                setClipboardStatus({ message: "", isError: false });
-            }, 3000);
+    const GameSelect = (
+        <div className="card">
+            <div className="card-row">
+                <label htmlFor="gameId">Game Id: </label>
+                <input 
+                    name="gameId"
+                    type="number"
+                    step="1"
+                    value={gameId?.toString() || ""}
+                    onChange={handleGameIdChance}
 
-            return () => clearTimeout(timer);
-        }
-    }, [clipboardStatus.message]);
+                />
+            </div>
+            <div className="card-row">
+                <button
+                    disabled={!gameId}
+                    onClick={async () => {
+                        if (!gameId) return;
+                        await createGame(account.account, gameId);
+                        setSelectedGameId(() => gameId);
+                    }}
+                >Create Game</button>
+                <button
+                    disabled={!gameId}
+                    onClick={async () => {
+                        if (!gameId) return;
+                        if (!game || game.game_id !== BigInt(gameId)) {
+                            const otherGame = getComponentValue(Games, getEntityIdFromKeys([BigInt(gameId)]));
+                            if (!otherGame || otherGame?.state as unknown as string === "Created") {
+                                await joinGame(account.account, gameId);
+                            }
+                        }
+                        setSelectedGameId(() => gameId);
+                    }}
+                >Join Game</button>
+            </div>
+        </div>
+    );
+
+    const SetBlack = (
+        <div className="card">
+            <h3>Choose your color</h3>
+            <p>The game will start automatically when players agree.</p>
+            <p>Other player's choice is underlined.</p>
+            <div className="card-row">
+                <button
+                    className={
+                        `${has_voted && has_black ? "active" : ""} `
+                        + `${other_has_voted && other_has_black ? "other-active" : ""}`
+                    }
+                    onClick={async () => {
+                        if (!gameId || !game || has_black) return;
+                        await setBlack(account.account, gameId, isController);
+                    }}
+                >Take Black</button>
+                <button
+                    className={
+                        `${has_voted && !has_black ? "active" : ""} `
+                        + `${other_has_voted && !other_has_black ? "other-active" : ""}`
+                    } 
+                    onClick={async () => {
+                        if (!gameId || !game || has_voted && !has_black) return;
+                        await setBlack(account.account, gameId, !isController);
+                    }}
+                >Take White</button>
+            </div>
+        </div>
+    )
 
     return (
         <>
@@ -104,66 +214,31 @@ function App() {
                 </div>
             </div>
 
-            <div className="card">
-                <button onClick={() => spawn(account.account)}>Spawn</button>
-                <div>
-                    Moves Left: {moves ? `${moves.remaining}` : "Need to Spawn"}
-                </div>
-                <div>
-                    Position:{" "}
-                    {position
-                        ? `${position?.vec.x}, ${position?.vec.y}`
-                        : "Need to Spawn"}
-                </div>
+            {!selectedGameId && GameSelect}
+            {gameState === "Created" ? <div>Waiting for opponent...</div> : null}
+            {selectedGameId != 0 && gameState === "Joined" && SetBlack}
 
-                <div>{moves && moves.last_direction}</div>
-
-                <div>
-                    <div>Available Positions</div>
-                    {directions?.directions.map((a: any, index: any) => (
-                        <div key={index} className="">
-                            {a}
-                        </div>
-                    ))}
+            {game && gameId && gameState === "Ongoing" && playerColor ? 
+                <>
+                    <p>{myTurn ? "It is your turn" : "It is your opponen'ts turn"}</p>
+                    <Board 
+                        gameId={gameId}
+                        board={game.board}
+                        myTurn={myTurn}
+                        myColor={playerColor}
+                    />
+                    <button>Pass</button> 
+                </>
+                : null}
+            {selectedGameId 
+                ? <div>
+                    <button 
+                        style={{ marginTop: 20 }} 
+                        onClick={() => setSelectedGameId(() => 0)}
+                    >Switch game</button>
                 </div>
-            </div>
-
-            <div className="card">
-                <div>
-                    <button
-                        onClick={() =>
-                            position && position.vec.y > 0
-                                ? move(account.account, Direction.Up)
-                                : console.log("Reach the borders of the world.")
-                        }
-                    >
-                        Move Up
-                    </button>
-                </div>
-                <div>
-                    <button
-                        onClick={() =>
-                            position && position.vec.x > 0
-                                ? move(account.account, Direction.Left)
-                                : console.log("Reach the borders of the world.")
-                        }
-                    >
-                        Move Left
-                    </button>
-                    <button
-                        onClick={() => move(account.account, Direction.Right)}
-                    >
-                        Move Right
-                    </button>
-                </div>
-                <div>
-                    <button
-                        onClick={() => move(account.account, Direction.Down)}
-                    >
-                        Move Down
-                    </button>
-                </div>
-            </div>
+                : null
+            }
         </>
     );
 }

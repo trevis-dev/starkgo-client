@@ -2,43 +2,88 @@
 
 import { Account, AccountInterface } from "starknet";
 import { DojoProvider } from "@dojoengine/core";
-import { Direction } from "../../utils";
+import { Position } from "../../utils";
 
 export type IWorld = Awaited<ReturnType<typeof setupWorld>>;
 
-export interface MoveProps {
+type CallCommonProps = {
+    account: AccountInterface;
+    game_id: number;
+}
+
+type PlayMoveProps = Omit<CallCommonProps, "account"> & {
     account: Account | AccountInterface;
-    direction: Direction;
+    position: Position;
 }
 
 export async function setupWorld(provider: DojoProvider) {
     function actions() {
-        const spawn = async ({ account }: { account: AccountInterface }) => {
+        const create_game = async ({ account, game_id }: CallCommonProps) => {
             try {
                 return await provider.execute(account, {
                     contractName: "actions",
-                    entrypoint: "spawn",
-                    calldata: [],
+                    entrypoint: "create_game",
+                    calldata: [game_id],
                 });
             } catch (error) {
-                console.error("Error executing spawn:", error);
+                console.error("Error executing create_game:", error);
+                throw error;
+            }
+        };
+        
+        const join_game = async ({ account, game_id }: CallCommonProps) => {
+            try {
+                return await provider.execute(account, {
+                    contractName: "actions",
+                    entrypoint: "join_game",
+                    calldata: [game_id],
+                });
+            } catch (error) {
+                console.error("Error executing join_game:", error);
+                throw error;
+            }
+        };
+        
+        const set_black = async ({ account, game_id, to_controller }: CallCommonProps & { to_controller: boolean }) => {
+            try {
+                return await provider.execute(account, {
+                    contractName: "actions",
+                    entrypoint: "set_black",
+                    calldata: [game_id, to_controller],
+                });
+            } catch (error) {
+                console.error("Error executing set_black:", error);
                 throw error;
             }
         };
 
-        const move = async ({ account, direction }: MoveProps) => {
+        const play_move = async ({ account, game_id, position }: PlayMoveProps) => {
             try {
                 return await provider.execute(account, {
                     contractName: "actions",
-                    entrypoint: "move",
-                    calldata: [direction],
+                    entrypoint: "play_move",
+                    calldata: [game_id, position.x, position.y] as number[],
                 });
             } catch (error) {
-                console.error("Error executing move:", error);
+                console.error("Error executing play_move:", error);
                 throw error;
             }
         };
-        return { spawn, move };
+
+        const pass = async ({ account, game_id }: CallCommonProps) => {
+            try {
+                return await provider.execute(account, {
+                    contractName: "actions",
+                    entrypoint: "pass",
+                    calldata: [game_id],
+                });
+            } catch (error) {
+                console.error("Error executing pass:", error);
+                throw error;
+            }
+        };
+
+        return { create_game, join_game, set_black, play_move, pass };
     }
     return {
         actions: actions(),

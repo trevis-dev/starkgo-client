@@ -53,9 +53,26 @@ button:hover {
     border-color: #646cff;
 }
 
+button.active {
+    outline: 5px auto;
+}
+button.other-active {
+    text-decoration: underline;
+}
+
 button:focus,
 button:focus-visible {
-    outline: 4px auto -webkit-focus-ring-color;
+    outline: 3px auto -webkit-focus-ring-color;
+}
+
+.card {
+    padding: 5px;
+    button {
+        margin: 5px;
+    }
+}
+.card .card-row {
+    padding: 3px;
 }
 
 @media (prefers-color-scheme: light) {

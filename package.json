@@ -8,7 +8,7 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "create-components": "npx @dojoengine/core ../dojo-starter/manifests/dev/manifest.json src/dojo/generated/contractComponents.ts http://localhost:5050 0xb4079627ebab1cd3cf9fd075dda1ad2454a7a448bf659591f259efa2519b18"
+    "create-components": "npx @dojoengine/core starkgo/manifests/dev/manifest.json src/dojo/generated/contractComponents.ts http://localhost:5050 0x7bf4dbc57ac4213d82f13516bae388f7980897fc16fbc64eb6d156a9d739030"
   },
   "dependencies": {
     "@dojoengine/core": "0.7.4",
