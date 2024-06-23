@@ -102,7 +102,7 @@ export function createSystemCalls(
 
             await new Promise((resolve) => setTimeout(resolve, 1000));
         } catch (e) {
-            console.log(e);
+            console.error(e);
         }
     };
 

@@ -17,7 +17,7 @@ function App() {
         },
         account,
     } = useDojo();
-
+    const [refresh, setRefresh] = useState(0);
     const [clipboardStatus, setClipboardStatus] = useState({
         message: "",
         isError: false,
@@ -39,18 +39,23 @@ function App() {
         ]) as Entity;
 
     const game = useComponentValue(Games, entityId);
+
+    useEffect(() => {
+        setRefresh((prev) => prev + 1);
+    }, [account?.account?.address, game, selectedGameId]);
+
     const isController = account?.account?.address === game?.controller.toString();
     const isOpponent = account?.account?.address === game?.opponent.toString();
     const playerVote = isController 
         ? game.controller_has_black.controller
         : isOpponent
-            ? game.controller_has_black.opponent 
+            ? game.controller_has_black.opponent
             : null;
     const otherVote = isController 
-    ? game.controller_has_black.opponent
-    : isOpponent
-        ? game.controller_has_black.controller 
-        : null;
+        ? game.controller_has_black.opponent
+        : isOpponent
+            ? game.controller_has_black.controller
+            : null;
     const has_voted = playerVote?.voted || false;
     const other_has_voted = otherVote?.voted || false;
     const has_black = has_voted 
@@ -70,9 +75,11 @@ function App() {
             ? game?.controller_has_black.controller.controller_has_black 
                 ? "Black" 
                 : "White" 
-            : game?.controller_has_black.controller.controller_has_black 
-                ? "White"
-                : "Black"
+            : isOpponent
+                ? game?.controller_has_black.controller.controller_has_black 
+                    ? "White"
+                    : "Black"
+                :null
         : null;
 
     const myTurn = playerColor === (game?.new_turn_player as unknown as string);
@@ -133,6 +140,13 @@ function App() {
                         setSelectedGameId(() => gameId);
                     }}
                 >Join Game</button>
+                <button
+                    disabled={!gameId}
+                    onClick={async () => {
+                        if (!gameId) return;
+                        setSelectedGameId(() => gameId);
+                    }}
+                >Observe</button>
             </div>
         </div>
     );
@@ -218,8 +232,8 @@ function App() {
             {gameState === "Created" ? <div>Waiting for opponent...</div> : null}
             {selectedGameId != 0 && gameState === "Joined" && SetBlack}
 
-            {game && gameId && gameState === "Ongoing" && playerColor ? 
-                <>
+            {game && gameId && gameState === "Ongoing" && playerColor
+                ? <>
                     <div>Prisoners - Black: {game.prisoners.black} | White: {game.prisoners.white} </div>
                     <p style={{textDecoration : myTurn ? "underline" : "none"}}>
                         {myTurn ? `It's your turn ! [${playerColor}]` : `It's your opponent's turn (${playerColor === "White" ? "Black": "White" })`}
@@ -229,13 +243,13 @@ function App() {
                         ? <p style={{fontStyle: "italic"}}>Your opponent passed.</p> 
                         : game?.previous_board
                             ? <p style={{fontStyle: "italic"}}>Your opponent played {getPositionLabel(game.last_move)}.</p> 
-                            : null
+                            : <br/>
                         :game?.last_passed 
                         ? <p style={{fontStyle: "italic"}}>You passed.</p> 
                         : game?.previous_board
                             ? <p style={{fontStyle: "italic"}}>You just played {getPositionLabel(game.last_move)}.</p> 
-                            : null
-                    :null
+                            : <br/>
+                    :<br/>
                     }
                     <Board 
                         gameId={gameId}
@@ -245,7 +259,15 @@ function App() {
                         myColor={playerColor}
                     />
                 </>
-                : null}
+                : game && gameId 
+                    ?<Board 
+                        gameId={gameId}
+                        board={game.board}
+                        last_move={game.last_move}
+                        myTurn={myTurn}
+                    />
+                :null
+            }
                 <hr/>
             {selectedGameId 
                 ? <div>

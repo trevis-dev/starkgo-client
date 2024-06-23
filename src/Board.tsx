@@ -11,7 +11,7 @@ const movePattern = /[A-I][1-9]/;
 const allZeroPattern = /^0+$/;
 
 
-const Board = (props: { gameId: number, board: BigInt, last_move: number[], myTurn: boolean, myColor: "White" | "Black"}) => {
+const Board = (props: { gameId: number, board: BigInt, last_move: number[], myTurn: boolean, myColor?: undefined | "White" | "Black"}) => {
     const [move, setMove] = useState("");
     const [position, setPosition] = useState<{x: Row, y: Column}>({x: Row.None, y: Column.None});
     const {
@@ -48,52 +48,55 @@ const Board = (props: { gameId: number, board: BigInt, last_move: number[], myTu
 
     return (
         <div>
-            <p>Board: {props.board.toString()}</p>
             <BoardCanvas
                 stones={stones}
                 lastMove={props.last_move}
                 playMove={
                     async (x: number, y: number) => {
-                        if (!position || !game || !props.myTurn) return;
+                        if (!position || !game || !props.myTurn || !props.myColor) return;
                         await playMove(account.account, props.gameId, {x, y});
                     }
                 }
             />
-
-            <p>Click on the board or enter your move as Row Letter + Column Number, such as "E5" or "B6":</p>
-            <div className="card">
-                <div className="card-row">
-                    <input
-                        value={move}
-                        onChange={handleMoveChange}
-                    />
-                    <button
-                        onClick={async () => {
-                            if (!position || !game) return;
-                            await playMove(account.account, props.gameId, position);
-                            setMove(() => "");
-                            resetPosition();
-                        }}
-                        disabled={!props.myTurn || !position.x}
-                    >
-                        Play {position.x ? move : ""}
-                    </button>
-                    
+            {props.myColor 
+            ? <>
+                <p>Click on the board or enter your move as Row Letter + Column Number, such as "E5" or "B6":</p>
+                <div className="card">
+                    <div className="card-row">
+                        <input
+                            value={move}
+                            onChange={handleMoveChange}
+                        />
+                        <button
+                            onClick={async () => {
+                                if (!position || !game) return;
+                                await playMove(account.account, props.gameId, position);
+                                setMove(() => "");
+                                resetPosition();
+                            }}
+                            disabled={!props.myTurn || !position.x}
+                        >
+                            Play {position.x ? move : ""}
+                        </button>
+                        
+                    </div>
+                    <div>
+                        <button 
+                            disabled={!props.myTurn}
+                            onClick={async () => {
+                                if (!position || !game) return;
+                                await pass(account.account, props.gameId);
+                                setMove(() => "");
+                                resetPosition();
+                            }}
+                        >
+                            Pass
+                        </button>
+                    </div>
                 </div>
-                <div>
-                    <button 
-                        disabled={!props.myTurn}
-                        onClick={async () => {
-                            if (!position || !game) return;
-                            await pass(account.account, props.gameId);
-                            setMove(() => "");
-                            resetPosition();
-                        }}
-                    >
-                        Pass
-                    </button>
-                </div>
-            </div>
+                </>
+            : <br/>
+            }
         </div>
     );
 }
