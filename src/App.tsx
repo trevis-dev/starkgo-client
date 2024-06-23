@@ -231,7 +231,7 @@ function App() {
             {!selectedGameId && GameSelect}
             {gameState === "Created" ? <div>Waiting for opponent...</div> : null}
             {selectedGameId != 0 && gameState === "Joined" && SetBlack}
-
+            <hr/><br/>
             {game && gameId && gameState === "Ongoing" && playerColor
                 ? <>
                     <div>Prisoners - Black: {game.prisoners.black} | White: {game.prisoners.white} </div>
@@ -268,7 +268,7 @@ function App() {
                     />
                 :null
             }
-                <hr/>
+            <hr/>
             {selectedGameId 
                 ? <div>
                     <button 
