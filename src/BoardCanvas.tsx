@@ -1,4 +1,7 @@
 import React, { useRef, useEffect } from 'react';
+import boardBg from "./assets/board.png";
+
+import { concatWith } from 'rxjs';
 
 export type Stone = { x: number, y: number, color: 'Black' | 'White' };
 
@@ -24,11 +27,22 @@ const BoardCanvas = (
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                drawBoard(ctx);
-                drawStones(ctx, props.stones);
+                const img = new Image();
+                img.onload = function () {
+                    ctx.globalAlpha = 0.9;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(Math.PI / 2);
+                    ctx.drawImage(img, -canvas.height / 2, -canvas.width / 2, canvas.height, canvas.width);
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.globalAlpha = 1;
+                    drawBoard(ctx);
+                    drawStones(ctx, props.stones);
+                }
+                img.src = boardBg;
             }
         }
-    }, [props.stones]);
+    }, [props.stones, canvasRef.current]);
 
     const handleCanvasClick = (event: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
@@ -57,7 +71,7 @@ const BoardCanvas = (
 };
 
 function drawBoard(ctx: CanvasRenderingContext2D) {
-    ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    // ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     ctx.strokeStyle = 'black';
 
     // Draw rows and columns

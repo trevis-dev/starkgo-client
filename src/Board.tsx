@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./App.css";
 import { StringToRow, StringToColumn, Row, Column } from "./utils";
 import { useDojo } from "./dojo/useDojo";
-import { Entity, Type } from "@dojoengine/recs";
+import { Entity } from "@dojoengine/recs";
 import { getEntityIdFromKeys } from "@dojoengine/utils";
 import { useComponentValue } from "@dojoengine/react";
 import BoardCanvas, {GRID_SIZE, type Stone} from "./BoardCanvas";
